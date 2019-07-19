@@ -111,7 +111,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
   def mapFirstWith[W,A](l: List[A])(f: A => Option[DoWith[W,A]]): DoWith[W,List[A]] = l match {
     //doreturn[W, R](r : R) creates a computation that leaves the state untouched,
     //but whose result is r
-    case Nil => doreturn(l)
+    case Nil => doreturn(l) //doget map { _ => l}
     case h :: t => f(h) match {
         //map method transforms a DoWith holding a computation with a W for a R to one for B using the callback f
       case None => mapFirstWith(t)(f) map  {(ft) => h :: ft}
