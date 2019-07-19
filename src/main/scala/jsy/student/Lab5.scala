@@ -109,8 +109,14 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
   // Just like mapFirst from Lab 4 but uses a callback f that returns a DoWith in the Some case.
   def mapFirstWith[W,A](l: List[A])(f: A => Option[DoWith[W,A]]): DoWith[W,List[A]] = l match {
-    case Nil => ???
-    case h :: t => ???
+    //doreturn[W, R](r : R) creates a computation that leaves the state untouched,
+    //but whose result is r
+    case Nil => doreturn(l)
+    case h :: t => f(h) match {
+        //map method transforms a DoWith holding a computation with a W for a R to one for B using the callback f
+      case None => mapFirstWith(t)(f) map  {(ft) => h :: ft}
+      case Some(d) => d map {d => d :: t}
+    }
   }
 
   // There are better ways to deal with the combination of data structures like List, Map, and
