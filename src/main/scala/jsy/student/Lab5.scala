@@ -51,7 +51,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case Binary(bop, e1, e2) => ren(env,e1) flatMap { e1p => ren(env,e2) map { e2p => Binary(bop, e1p, e2p) } }
       case If(e1, e2, e3) => ren(env,e1) flatMap { e1p => ren(env,e2) flatMap { e2p => ren(env,e3) map {e3p => If(e1p, e2p, e3p)} } }
 
-      case Var(x) => ???
+      case Var(x) => if (env.contains(x)) doreturn(Var(lookup(env,x))) else doreturn(Var(x))
 
       case Decl(m, x, e1, e2) => fresh(x) flatMap { xp =>
         ???
