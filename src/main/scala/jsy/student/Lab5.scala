@@ -9,9 +9,13 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
   /*
    * CSCI 3155: Lab 5
-   * <Your Name>
+   * John Baker
+   * Colin Bradley
+   * Lauren Deans
+   * Jose Gutierrez
+   * Carter Reid
    *
-   * Partner: <Your Partner's Name>
+   * Partner: <See Above>
    * Collaborators: <Any Collaborators>
    */
 
@@ -95,15 +99,17 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
   // List map with an operator returning a DoWith
   def mapWith[W,A,B](l: List[A])(f: A => DoWith[W,B]): DoWith[W,List[B]] = {
-    l.foldRight[DoWith[W,List[B]]]( ??? ) {
-      ???
+    l.foldRight[DoWith[W,List[B]]]( doreturn(Nil) ) {  //Initialize foldRight to Nil/Empty DoWith List
+      //Perform function on each item and keep accumulator as list
+      (a, b) => b flatMap { bp => f(a) map { c => c :: bp } }
     }
   }
 
   // Map map with an operator returning a DoWith
   def mapWith[W,A,B,C,D](m: Map[A,B])(f: ((A,B)) => DoWith[W,(C,D)]): DoWith[W,Map[C,D]] = {
-    m.foldRight[DoWith[W,Map[C,D]]]( ??? ) {
-      ???
+    m.foldRight[DoWith[W,Map[C,D]]]( doreturn(Map.empty) ) {  //Initialize foldRight to Nil/Empty DoWith Map
+      //Perform function on each item and keep accumulator as mappings (add mapping to map)
+      (a, b) => b flatMap { bp => f(a) map { c => bp + c } }
     }
   }
 

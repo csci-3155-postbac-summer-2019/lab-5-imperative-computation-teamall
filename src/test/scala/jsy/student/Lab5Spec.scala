@@ -35,6 +35,22 @@ class Lab5Spec(lab5: Lab5Like) extends FlatSpec {
     }
   }
 
+  /*"mapWith(Map)" should "map the elements of a list in a DoWith" in {
+    val m = Map("a" -> 1, "b" -> 2, "c" -> 3)
+    val r1 = m.map { i => i + 1 }
+
+    def dowith2[W]: DoWith[W,List[Int]] = mapWith(m) { i: Int => doreturn(m(i) + 1) }
+    assertResult((true,r1)) { dowith2(true) }
+    assertResult((42,r1)) { dowith2(42) }
+
+    assertResult((2 * m.size + 1, r1)) {
+      val dw: DoWith[Int,List[Int]] = mapWith(m) { i: Int =>
+        domodify[Int](s => s + 2) map { _ => i + 1 }
+      }
+      dw(1)
+    }
+  }*/
+
   "rename" should "rename in a DoWith" in {
     val e1 = parse("const a = 1 + a; a")
     val e1p = parse("const aa = 1 + a; aa")
