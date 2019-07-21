@@ -47,9 +47,9 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case N(_) | B(_) | Undefined | S(_) => doreturn(e)
       case Print(e1) => ren(env,e1) map { e1p => Print(e1p) }
 
-      case Unary(uop, e1) => ???
-      case Binary(bop, e1, e2) => ???
-      case If(e1, e2, e3) => ???
+      case Unary(uop, e1) => ren(env,e1) map { e1p => Unary(uop, e1p) }
+      case Binary(bop, e1, e2) => ren(env,e1) flatMap { e1p => ren(env,e2) map { e2p => Binary(bop, e1p, e2p) } }
+      case If(e1, e2, e3) => ren(env,e1) flatMap { e1p => ren(env,e2) flatMap { e2p => ren(env,e3) map {e3p => If(e1p, e2p, e3p)} } }
 
       case Var(x) => ???
 
