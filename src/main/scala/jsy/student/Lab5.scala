@@ -49,12 +49,16 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
       case Unary(uop, e1) => ren(env,e1) map { e1p => Unary(uop, e1p) }
       case Binary(bop, e1, e2) => ren(env,e1) flatMap { e1p => ren(env,e2) map { e2p => Binary(bop, e1p, e2p) } }
-      case If(e1, e2, e3) => ren(env,e1) flatMap { e1p => ren(env,e2) flatMap { e2p => ren(env,e3) map {e3p => If(e1p, e2p, e3p)} } }
+      case If(e1, e2, e3) => ren(env,e1) flatMap { e1p => ren(env,e2) flatMap { e2p => ren(env,e3) map { e3p => If(e1p, e2p, e3p) } } }
 
-      case Var(x) => if (env.contains(x)) doreturn(Var(lookup(env,x))) else doreturn(Var(x))
+      case Var(x) => if (env.contains(x)) doreturn(Var(lookup(env,x))) else doreturn(Var(x))  //Same as lab4, just need 'doreturn'
 
-      case Decl(m, x, e1, e2) => fresh(x) flatMap { xp =>
-        ???
+      case Decl(m, x, e1, e2) => fresh(x) flatMap { xp =>  //Create xp from x
+        ren(env, e1) flatMap { e1p =>  //Create e1p from e1 (Use same as Lab4)
+          ren(env + (x -> xp), e2) map { e2p =>  //Create e2p from e2 (Use same as Lab4)
+            Decl(m, xp, e1p, e2p)  //Construct return Decl from computed parts above  (ie. Lab4 in pass-down steps)
+          }
+        }
       }
 
       case Function(p, params, tann, e1) => {
