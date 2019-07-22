@@ -53,9 +53,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
       case Var(x) => if (env.contains(x)) doreturn(Var(lookup(env,x))) else doreturn(Var(x))
 
-      case Decl(m, x, e1, e2) => fresh(x) flatMap { xp =>
-        ???
-      }
+      case Decl(m, x, e1, e2) => fresh(x) flatMap { xp => ren(env,e1) flatMap { e1p => ren(extend(env,x,xp),e2) map {e2p => Decl(m,xp,e1p,e2p) }}}
 
       case Function(p, params, tann, e1) => {
         val w: DoWith[W,(Option[String], Map[String,String])] = p match {
