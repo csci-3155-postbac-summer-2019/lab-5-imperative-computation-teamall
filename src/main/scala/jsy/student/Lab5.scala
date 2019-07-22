@@ -151,7 +151,10 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
     case _ => false
   }
 
-  def isBindex(m: Mode, e: Expr): Boolean = ???
+  def isBindex(m: Mode, e: Expr): Boolean = m match {
+    case MConst | MName | MVar => true
+    case _ => false
+  }
 
   def typeof(env: TEnv, e: Expr): Typ = {
     def err[T](tgot: Typ, e1: Expr): T = throw StaticTypeError(tgot, e1, e)
@@ -278,7 +281,18 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
     require(isValue(v2), s"inequalityVal: v2 ${v2} is not a value")
     require(bop == Lt || bop == Le || bop == Gt || bop == Ge)
     (v1, v2) match {
-      case _ => ??? // delete this line when done
+      case (S(val1), S(val2)) => bop match {
+        case Lt => val1 < val2
+        case Le => val1 <= val2
+        case Gt => val1 > val2
+        case Ge => val1 >= val2
+      }
+      case (N(val1), N(val2)) => bop match {
+        case Lt => val1 < val2
+        case Le => val1 <= val2
+        case Gt => val1 > val2
+        case Ge => val1 >= val2
+      }
     }
   }
 
@@ -287,20 +301,34 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
     def subst(e: Expr): Expr = e match {
       case N(_) | B(_) | Undefined | S(_) => e
       case Print(e1) => Print(subst(e1))
-        /***** Cases from Lab 4 */
-      case Unary(uop, e1) => ???
-      case Binary(bop, e1, e2) => ???
-      case If(e1, e2, e3) => ???
-      case Var(y) => ???
-      case Decl(mode, y, e1, e2) => ???
+
+      /** *** Cases from Lab 3 */
+      case Unary(uop, e1) => Unary(uop, subst(e1))
+      case Binary(bop, e1, e2) => Binary(bop, subst(e1), subst(e2))
+      case If(e1, e2, e3) => If(subst(e1), subst(e2), subst(e3))
+      case Var(y) => if (x == y) esub else e
+      case Decl(mode, y, e1, e2) => if (y == x) Decl(mode, y, subst(e1), e2) else Decl(mode, y, subst(e1), subst(e2))
+
+      /** *** Cases needing adapting from Lab 3 */
       case Function(p, params, tann, e1) =>
-        ???
-      case Call(e1, args) => ???
-      case Obj(fields) => ???
-      case GetField(e1, f) => ???
+        if (params.exists((parameter: (String, MTyp)) => parameter._1 == x)) // if the parameter exists in the function, return the function
+        //scala is 1 indexed like a bunch of savages
+        // use ._1 to access the string in the parameter, use ._2 to access the MType
+        //https://stackoverflow.com/questions/6884298/why-is-scalas-syntax-for-tuples-so-unusual
+          Function(p, params, tann, e1)
+        else
+          Function(p, params, tann, subst(e1))
+      // Need to do 2 checks: compare p (function name) to x and each parameter to x.
+      // Also need to handle anonymous (no function name) case
+
+      case Call(e1, args) => Call(subst(e1), args.map(arg => subst(arg))) //sub on function name and use map to sub args
+
+      /** *** New cases for Lab 4 */
+      case Obj(fields) => Obj(fields.mapValues(e => subst(e)))
+      case GetField(e1, f) => GetField(subst(e1), f)
         /***** New cases for Lab 5 */
       case Null | A(_) => ???
-      case Assign(e1, e2) => ???
+      case Assign(e1, e2) => Assign(subst(e1), subst(e2))
 
       /* Should not match: should have been removed */
       case InterfaceDecl(_, _, _) => throw new IllegalArgumentException("Gremlins: Encountered unexpected expression %s.".format(e))
