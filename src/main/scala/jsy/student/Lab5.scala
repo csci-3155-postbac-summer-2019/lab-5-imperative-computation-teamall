@@ -159,34 +159,62 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
     e match {
       case Print(e1) => typeof(env, e1); TUndefined
         /***** Cases directly from Lab 4. We will minimize the test of these cases in Lab 5. */
-      case N(_) => ???
-      case B(_) => ???
-      case Undefined => ???
-      case S(_) => ???
-      case Var(x) => ???
+      case N(_) => TNumber
+      case B(_) => TBool
+      case Undefined => TUndefined
+      case S(_) => TString
+      case Var(x) => val MTyp(m, t) = lookup(env, x); t
+      // in the environment where x has typeof e1, e2 evaluates to type tau2
       case Unary(Neg, e1) => typeof(env, e1) match {
         case TNumber => TNumber
         case tgot => err(tgot, e1)
       }
-      case Unary(Not, e1) =>
-        ???
-      case Binary(Plus, e1, e2) =>
-        ???
-      case Binary(Minus|Times|Div, e1, e2) =>
-        ???
-      case Binary(Eq|Ne, e1, e2) =>
-        ???
-      case Binary(Lt|Le|Gt|Ge, e1, e2) =>
-        ???
-      case Binary(And|Or, e1, e2) =>
-        ???
-      case Binary(Seq, e1, e2) =>
-        ???
-      case If(e1, e2, e3) =>
-        ???
+      case Unary(Not, e1) => typeof(env, e1) match {
+        case TBool => TBool
+        case tgot => err(tgot, e1)
+      }
 
-      case Obj(fields) => ???
-      case GetField(e1, f) => ???
+      case Binary(Plus, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
+        case (TNumber, TNumber) => TNumber
+        case (TString, TString) => TString
+        case (tgot1, tgot2) => err(tgot1, e1)
+      }
+
+      case Binary(Minus|Times|Div, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
+        case (TNumber, TNumber) => TNumber
+        case (tgot1, tgot2) => err(tgot1, e1)
+      }
+
+      case Binary(Eq|Ne, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
+        case (typeE1, typeE2) if (!hasFunctionTyp(typeE1)) && (!hasFunctionTyp(typeE2)) => typeE1
+        case (tgot1, tgot2) => err(tgot1, e1)
+      }
+
+      case Binary(Lt|Le|Gt|Ge, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
+        case (TString, TString) => TString
+        case (TNumber, TNumber) => TNumber
+        case (tgot1, tgot2) => err(tgot1, e1)
+      }
+
+      case Binary(And|Or, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
+        case (TBool, TBool) => TBool
+        case (tgot1, tgot2) => err(tgot1, e1)
+      }
+
+      case Binary(Seq, e1, e2) => e2 match {
+        case _ => typeof(env, e2)
+      }
+
+      case If(e1, e2, e3) => (typeof(env, e1), typeof(env, e2), typeof(env, e3)) match {
+        case (TBool, typeE2, typeE3) => typeE2
+        case (_, tgot2, tgot3) if tgot2 != tgot3 => err(tgot2, e2)
+      }
+
+      case Obj(fields) => TObj(fields mapValues( exp => typeof(env,exp)))
+      case GetField(e1, f) => typeof(env, e1) match {
+        case TObj(fields) => if (fields.contains(f)) fields(f) else throw StaticTypeError(typeof(env,e1),e1,e)
+        case _ => throw StaticTypeError(typeof(env,e1),e1,e)
+      }
 
         /***** Cases from Lab 4 that need a small amount of adapting. */
       case Decl(m, x, e1, e2) => ???
