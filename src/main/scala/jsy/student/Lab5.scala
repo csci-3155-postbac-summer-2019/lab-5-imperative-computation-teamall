@@ -295,18 +295,18 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
     require(isValue(v1), s"inequalityVal: v1 ${v1} is not a value")
     require(isValue(v2), s"inequalityVal: v2 ${v2} is not a value")
     require(bop == Lt || bop == Le || bop == Gt || bop == Ge)
-    (v1, v2) match {
-      case (S(val1), S(val2)) => bop match {
-        case Lt => val1 < val2
-        case Le => val1 <= val2
-        case Gt => val1 > val2
-        case Ge => val1 >= val2
+    ((v1, v2): @unchecked) match {
+      case (S(s1), S(s2)) => (bop: @unchecked) match {
+        case Lt => s1 < s2
+        case Le => s1 <= s2
+        case Gt => s1 > s2
+        case Ge => s1 >= s2
       }
-      case (N(val1), N(val2)) => bop match {
-        case Lt => val1 < val2
-        case Le => val1 <= val2
-        case Gt => val1 > val2
-        case Ge => val1 >= val2
+      case (N(n1), N(n2)) => (bop: @unchecked) match {
+        case Lt => n1 < n2
+        case Le => n1 <= n2
+        case Gt => n1 > n2
+        case Ge => n1 >= n2
       }
     }
   }
@@ -353,7 +353,8 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
     def myrename(e: Expr): Expr = {
       val fvs = freeVars(esub) //from Lab4
       def fresh(x: String): String = if (fvs contains x) fresh(x + "$") else x //From Lab4
-      rename[Unit](e)(){ x => doreturn(fresh(x)) }
+
+      rename[Unit](e)(doreturn(Nil)){ x => doreturn(fresh(x)) }
     }
 
     subst(myrename(e)) // change this line when you implement capture-avoidance #changed
