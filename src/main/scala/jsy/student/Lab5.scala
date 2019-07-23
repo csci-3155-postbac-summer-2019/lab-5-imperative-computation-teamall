@@ -314,7 +314,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
   /* Capture-avoiding substitution in e replacing variables x with esub. */
   def substitute(e: Expr, esub: Expr, x: String): Expr = {
     def subst(e: Expr): Expr = e match {
-      case N(_) | B(_) | Undefined | S(_) => e
+      case N(_) | B(_) | Undefined | S(_) | Null | A(_)  => e
       case Print(e1) => Print(subst(e1))
 
       /** *** Cases from Lab 3 */
@@ -342,7 +342,8 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case Obj(fields) => Obj(fields.mapValues(e => subst(e)))
       case GetField(e1, f) => GetField(subst(e1), f)
         /***** New cases for Lab 5 */
-      case Null | A(_) => ???
+        //added Null and A(_) cases above
+      // case Null | A(_) => ???
       case Assign(e1, e2) => Assign(subst(e1), subst(e2))
 
       /* Should not match: should have been removed */
@@ -350,12 +351,12 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
     }
 
     def myrename(e: Expr): Expr = {
-      val fvs = freeVars(esub)
-      def fresh(x: String): String = if (???) fresh(x + "$") else x
-      rename[Unit](e)(???){ x => ??? }
+      val fvs = freeVars(esub) //from Lab4
+      def fresh(x: String): String = if (fvs contains x) fresh(x + "$") else x //From Lab4
+      rename[Unit](e)(){ x => doreturn(fresh(x)) }
     }
 
-    subst(e) // change this line when you implement capture-avoidance
+    subst(myrename(e)) // change this line when you implement capture-avoidance #changed
   }
 
   /* Check whether or not an expression is reducible given a mode. */
