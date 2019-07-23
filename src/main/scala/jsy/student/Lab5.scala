@@ -63,8 +63,14 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
       case Function(p, params, tann, e1) => {
         val w: DoWith[W,(Option[String], Map[String,String])] = p match {
-          case None => ???
-          case Some(x) => ???
+          case None => doreturn((None, env))
+          case Some(x) => fresh(x) map { xp => (Some(xp), extend(env, x, xp))}
+          //case Some(x) => doreturn((Some(fresh(x)), extend(env, x, fresh(x))))
+          /*case Some(x) => fresh(x) flatMap { xp =>
+            extend(env, x, fresh(x) map { envp =>
+              (Some(xp), envp)
+            }
+          }*/
         }
         w flatMap { case (pp, envp) =>
           params.foldRight[DoWith[W,(List[(String,MTyp)],Map[String,String])]]( doreturn((Nil, envp)) ) {
@@ -92,11 +98,14 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
   }
 
   def myuniquify(e: Expr): Expr = {
-    val fresh: String => DoWith[Int,String] = { _ =>
-      ???
+    val fresh: String => DoWith[Int,String] = { _ =>  //Modify 'Uniqify' from Lab5Like.scala
+      doget flatMap { i =>  //Get the existing/previous i (ie. get state)
+        val xp = "x" + i  //Create string of x plus i
+        doput(i + 1) map { _ => xp }  //Set updated i and  map to new variable name xp (ie. put state and map)
+      }
     }
-    val (_, r) = rename(empty, e)(fresh)(???)
-    r
+    val (_, r) = rename(empty, e)(fresh)(0)  //Run rename with empty environment and initialized/default to 0
+    r  //return r (result)
   }
 
   /*** Helper: mapFirst to DoWith ***/
@@ -136,7 +145,9 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
   def castOk(t1: Typ, t2: Typ): Boolean = (t1, t2) match {
       /***** Make sure to replace the case _ => ???. */
-    //case _ => ???
+    case (TNull, TObj(x)) => true  //Revise (Added for testcase passing, did not improve score)
+    //Add more cases here
+    //case_ ???
       /***** Cases for the extra credit. Do not attempt until the rest of the assignment is complete. */
     case (TInterface(tvar, t1p), _) => ???
     case (_, TInterface(tvar, t2p)) => ???
