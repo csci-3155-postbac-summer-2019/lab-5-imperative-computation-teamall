@@ -120,6 +120,14 @@ class Lab5Spec(lab5: Lab5Like) extends FlatSpec {
     }
   }
 
+  "DoNot" should "return opposite Boolean" in {
+    val e1 = B(true)
+    val e2 = Unary(Not, e1)
+    assertResult( B(false) ) {
+      val (_, r) = step(e2)(memempty)
+      r
+    }
+  }
   // Probably want to write some tests for castOk, typeInfer, substitute, and step.
 
 }

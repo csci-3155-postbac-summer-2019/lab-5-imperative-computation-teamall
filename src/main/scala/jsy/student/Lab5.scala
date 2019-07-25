@@ -387,7 +387,14 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       /* Base Cases: Do Rules */
       case Print(v1) if isValue(v1) => doget map { m => println(pretty(m, v1)); Undefined }
         /***** Cases needing adapting from Lab 3. */
-      case Unary(Neg, v1) if isValue(v1) => ???
+        //DoNeg
+      case Unary(Neg, v1) if isValue(v1) => v1 match {
+        case N(n1) => doreturn(N(-n1))}
+        //DoNot
+      case Unary(Not, v1) if isValue(v1) => v1 match {
+        case B(b1) => doreturn(B(!b1))}
+
+
         /***** More cases here */
         /***** Cases needing adapting from Lab 4. */
       case Obj(fields) if (fields forall { case (_, vi) => isValue(vi)}) =>
