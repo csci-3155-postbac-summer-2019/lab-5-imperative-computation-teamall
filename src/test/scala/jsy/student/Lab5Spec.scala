@@ -70,7 +70,7 @@ class Lab5Spec(lab5: Lab5Like) extends FlatSpec {
     assertResult(ep) { uniquify(e) }
   }
 
-  //Added testcase
+  //Added testcases
   "myuniquify" should "uniquify variables as x with a global counter for each variable" in {
     val e1 = parse("const a = 1; a")
     val e1p = parse("const x1 = 1; x1")
@@ -80,6 +80,27 @@ class Lab5Spec(lab5: Lab5Like) extends FlatSpec {
     val ep = Decl(MConst, "x0", e1p, e2p)
     assertResult(ep) { myuniquify(e) }
   }
+
+  "isRedex" should "capture when expression e is reducible under a mode m" in {
+    val t = true
+    val f = false
+    val e1 = parse("const a = 1; a")
+    val e2 = parse("const b = 2; b")
+    val ee = Decl(MConst, "a", e1, e2)
+    val vale = N(1)
+    var foo = 1
+    foo = foo + 1
+    val efoo = N(foo)
+    assertResult(t) {isRedex(MConst, ee )}
+    assertResult(f) {isRedex(MConst, vale)}
+    val e11 = Var("y")
+    assertResult(t) {isRedex(MVar,e11 )}
+    assertResult(f) {isRedex(MVar, vale)}
+    assertResult(t) {isRedex(MRef, e11)}
+    val lval = !isLValue(efoo)
+    assertResult(lval) {isRedex(MRef, efoo)}
+  }
+
 
 
   /* Tests based on rules */

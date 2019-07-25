@@ -361,12 +361,23 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
   }
 
   /* Check whether or not an expression is reducible given a mode. */
-  def isRedex(mode: Mode, e: Expr): Boolean =
-    ???
+  def isRedex(mode: Mode, e: Expr): Boolean = mode match {
+    case MConst | MVar if !isValue(e) => true //ValMode rule
+    case MRef if !isLValue(e) => true //RefMode rule
+    case _ => false
+    }
+
+
 
   def getBinding(mode: Mode, e: Expr): DoWith[Mem,Expr] = {
     require(!isRedex(mode,e), s"expression ${e} must not reducible under mode ${mode}")
-    ???
+    mode match {
+      case MConst => doreturn(e) //ConstBind rule
+      case MName => doreturn(e) //NameBind rule
+      case MRef => doreturn(e) //RefBind rule
+      case MVar => memalloc(e) map { a => Unary(Deref, a) } //memalloc from ast.scala
+
+    }
   }
 
   /* A small-step transition. */
