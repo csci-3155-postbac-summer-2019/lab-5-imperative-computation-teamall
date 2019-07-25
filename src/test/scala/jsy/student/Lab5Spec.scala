@@ -128,6 +128,42 @@ class Lab5Spec(lab5: Lab5Like) extends FlatSpec {
       r
     }
   }
+
+  "DoSeq" should "return result of sequential operations" in {
+    val e1 = N(5)
+    val e2 = N(100)
+    val e3 = Binary(Seq, e1,e2)
+    assertResult(e2) {
+      val (_, r) = step(e3)(memempty)
+      r
+    }
+  }
+
+  "DoPlusString" should "return result of adding 2 strings" in {
+    val e1 = S("hello")
+    val e2 = S("there")
+    val e3 = Binary(Plus, e1,e2)
+    val e4 = S("hellothere")
+    assertResult(e4) {
+      val (_,r) = step(e3)(memempty)
+      r
+    }
+
+  }
+
+  "DoArith(plus)" should "return result of adding 2 number values" in {
+    val e1 = N(1)
+    val e2 = N(7)
+    val e3 = Binary(Plus, e1,e2)
+    val e4 = N(8)
+    assertResult(e4) {
+      val (_,r) = step(e3)(memempty)
+      r
+    }
+  }
+
+
+
   // Probably want to write some tests for castOk, typeInfer, substitute, and step.
 
 }

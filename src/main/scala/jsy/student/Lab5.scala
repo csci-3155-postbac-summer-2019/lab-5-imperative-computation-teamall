@@ -389,10 +389,31 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         /***** Cases needing adapting from Lab 3. */
         //DoNeg
       case Unary(Neg, v1) if isValue(v1) => v1 match {
-        case N(n1) => doreturn(N(-n1))}
+        case N(n1) => doreturn(N(-n1))
+        case _ => throw StuckError(e)}
         //DoNot
       case Unary(Not, v1) if isValue(v1) => v1 match {
-        case B(b1) => doreturn(B(!b1))}
+        case B(b1) => doreturn(B(!b1))
+        case _ => throw StuckError(e)}
+        //DoSeq
+      case Binary(Seq, v1, e2) if isValue(v1) => doreturn(e2)
+        //DoPlusString & DoArith(+)
+      case Binary(Plus, v1, v2) if isValue(v1) && isValue(v2) =>
+        (v1, v2) match {
+          case (S(s1), S(s2)) => doreturn(S(s1 + s2))
+          case (N(n1), N(n2)) => doreturn(N(n1 + n2))
+          case _ => throw StuckError(e)
+
+      }
+        //DoEquality
+      case Binary( bop @ (Eq|Ne), v1, v2) if isValue(v1) && isValue(v2) =>
+        bop match {
+          case Eq => doreturn(B(v1 == v2))
+          case Ne => doreturn(B(v1 != v2))
+        }
+
+
+
 
 
         /***** More cases here */
