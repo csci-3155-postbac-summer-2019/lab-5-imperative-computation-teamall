@@ -403,17 +403,54 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
           case (S(s1), S(s2)) => doreturn(S(s1 + s2))
           case (N(n1), N(n2)) => doreturn(N(n1 + n2))
           case _ => throw StuckError(e)
-
-      }
+        }
         //DoEquality
       case Binary( bop @ (Eq|Ne), v1, v2) if isValue(v1) && isValue(v2) =>
         bop match {
           case Eq => doreturn(B(v1 == v2))
           case Ne => doreturn(B(v1 != v2))
         }
-
-
-
+        //DoAndTrue & DoAndFalse
+      case Binary(And, v1, e2) if isValue(v1) =>
+        v1 match {
+          case B(b1) => if (b1) doreturn(e2) else doreturn(B(false))
+          case _ => throw StuckError(e)
+        }
+        //DoOrTrue & DoOrFalse
+      case Binary(Or, v1, e2) if isValue(v1) =>
+        v1 match {
+          case B(b1) => if (b1) doreturn(v1) else doreturn(e2)
+          case _ => throw StuckError(e)
+        }
+        //DoArith(Minus,Times, Div)
+      case Binary(bop @ (Minus|Times|Div), v1, v2) if isValue(v1) && isValue(v2) =>
+        (v1, v2) match {
+          case (N(n1), N(n2)) =>
+            bop match {
+              case Minus => doreturn(N(n1 - n2))
+              case Times => doreturn(N(n1 * n2))
+              case Div => doreturn(N(n1 / n2))
+            }
+          case _ => throw StuckError(e)
+        }
+        //DoInequalityString & DoInequalityNumber
+      case Binary(bop @ (Lt|Le|Gt|Ge),v1,v2) if isValue(v1) && isValue(v2) =>
+        (v1,v2) match {
+          case ((N(_), N(_)) | (S(_),S(_))) =>
+            bop match {
+              case Lt => doreturn(B(inequalityVal(Lt,v1,v2)))
+              case Le => doreturn(B(inequalityVal(Le,v1,v2)))
+              case Gt => doreturn(B(inequalityVal(Gt,v1,v2)))
+              case Ge => doreturn(B(inequalityVal(Ge,v1,v2)))
+            }
+          case _ => throw StuckError(e)
+        }
+        //DoIfTrue & DoIfFalse
+      case If(v1,e2,e3) if isValue(v1) =>
+        v1 match {
+          case B(b1) => if (b1) doreturn(e2) else doreturn(e3)
+          case _ => throw StuckError(e)
+        }
 
 
         /***** More cases here */

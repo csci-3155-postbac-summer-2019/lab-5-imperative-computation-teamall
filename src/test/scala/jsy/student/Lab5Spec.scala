@@ -162,6 +162,151 @@ class Lab5Spec(lab5: Lab5Like) extends FlatSpec {
     }
   }
 
+  "DoAndTrue" should "return true if both v1 and e2 are true" in {
+    val v1 = B(true)
+    val e2 = N(7)
+    val e3 = Binary(And, v1, e2)
+    val e4 = true
+    assertResult(e2) {
+      val (_,r) = step(e3)(memempty)
+      r
+    }
+  }
+
+  "DoAndFalse" should "return false if v1 is false without looking at e2" in {
+    val v1 = B(false)
+    val e2 = S("you weren't supposed to get here!")
+    val e3 = Binary(And, v1, e2)
+    assertResult(v1) {
+      val (_,r) = step(e3)(memempty)
+      r
+    }
+  }
+
+  "DoOr" should "return true if either v1 or e2 is true" in {
+    val v1 = B(false)
+    val e2 = S("this is what is supposed to happen")
+    val e3 = Binary(Or, v1, e2)
+    assertResult(e2) {
+      val (_,r) = step(e3)(memempty)
+      r
+    }
+    val e5 = B(true)
+    val e4 = Binary(Or, v1, e5)
+    assertResult(e5) {
+      val (_,r) = step(e4)(memempty)
+      r
+    }
+  }
+
+  "DoArith" should "perform arithmetic operations (Minus, Times, Div)" in {
+    val v1 = N(100)
+    val v2 = N(50)
+    val v3 = N(50)
+    val v4 = N(5000)
+    val v5 = N(2)
+    val e = Binary(Minus, v1, v2)
+    val f = Binary(Times, v1,v2)
+    val g = Binary(Div, v1,v2)
+    assertResult(v3) {
+      val (_,r) = step(e)(memempty)
+      r
+    }
+    assertResult(v4) {
+      val (_,r) = step(f)(memempty)
+      r
+    }
+    assertResult(v5) {
+      val (_,r) = step(g)(memempty)
+      r
+    }
+  }
+
+  "DoInequalityNumber" should "return result of calling inequality on 2 numbers" in {
+    val v1 = N(100)
+    val v2 = N(50)
+    val v3 = N(50)
+    val v4 = N(5000)
+    val v5 = N(2)
+    val e1 = Binary(Lt, v1,v2)
+    val e2 = Binary(Le, v2,v3)
+    val e3 = Binary(Gt, v4, v3)
+    val e4 = Binary(Ge, v3,v1)
+    val t = B(true)
+    val f = B(false)
+    assertResult(f) {
+      val (_,r) = step(e1)(memempty)
+      r
+    }
+    assertResult(t) {
+      val (_,r) = step(e2)(memempty)
+      r
+    }
+    assertResult(t) {
+      val (_,r) = step(e3)(memempty)
+      r
+    }
+    assertResult(f) {
+      val (_,r) = step(e4)(memempty)
+      r
+    }
+  }
+
+  "DoInequalityString" should "return result of calling inequality on 2 strings" in {
+    val v1 = S("hello")
+    val v2 = S("hellothere")
+    val v3 = S("hello")
+    val v4 = S("teddy")
+    val t = B(true)
+    val f = B(false)
+    val e1 = Binary(Lt, v1,v2)
+    val e2 = Binary(Le, v2,v3)
+    val e3 = Binary(Gt, v4, v3)
+    val e4 = Binary(Ge, v3,v1)
+    assertResult(t) {
+      val (_,r) = step(e1)(memempty)
+      r
+    }
+    assertResult(f) {
+      val (_,r) = step(e2)(memempty)
+      r
+    }
+    assertResult(t) {
+      val (_,r) = step(e3)(memempty)
+      r
+    }
+    assertResult(t) {
+      val (_,r) = step(e4)(memempty)
+      r
+    }
+  }
+
+  "DoIfTrue" should "return e2 if v1 is true, else return e3" in {
+    val v1 = B(true)
+    val e2 = N(100)
+    val e3 = N(200)
+    val e4 = If(v1,e2,e3)
+    assertResult(e2) {
+      val (_,r) = step(e4)(memempty)
+      r
+    }
+  }
+
+  "DoIfFalse" should "return e3 if v1 is false" in {
+    val v1 = B(false)
+    val e2 = N(100)
+    val e3 = N(200)
+    val e4 = If(v1,e2,e3)
+    assertResult(e3) {
+      val (_,r) = step(e4)(memempty)
+      r
+    }
+
+  }
+
+
+
+
 
 
   // Probably want to write some tests for castOk, typeInfer, substitute, and step.
