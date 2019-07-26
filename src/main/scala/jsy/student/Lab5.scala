@@ -499,17 +499,24 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       //case _ => throw NullDeferenceError(e)
 
       /* Inductive Cases: Search Rules */
+        //SearchPrint
       case Print(e1) => step(e1) map { e1p => Print(e1p) }
         /***** Cases needing adapting from Lab 3. Make sure to replace the case _ => ???. */
-      case Unary(uop, e1) => ???
+        //SearchUnary
+      case Unary(uop, e1) => step(e1) map { e1p => Unary(uop,e1p) }
+        //SearchBinary2
+      case Binary(bop, v1, e2) if isValue(v1) => step(e2) map { e2p => Binary(bop, v1, e2p) }
+        //SearchBinary1
+      case Binary(bop, e1, e2) => step(e1) map { e1p => Binary(bop, e1p, e2) }
+        //SearchIf
+      case If(e1,e2,e3) => step(e1) map { e1p => If(e1p,e2,e3) }
         /***** Cases needing adapting from Lab 4 */
       case GetField(e1, f) =>
         ???
       case Obj(fields) =>
         ???
-
-      case Decl(mode, x, e1, e2) =>
-        ???
+        //SearchDecl
+      case Decl(mode, x, e1, e2) => step(e1) map { e1p => Decl(mode,x,e1p,e2) }
       case Call(e1, args) =>
         ???
 
