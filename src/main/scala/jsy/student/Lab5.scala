@@ -44,7 +44,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
   def rename[W](env: Map[String,String], e: Expr)(fresh: String => DoWith[W,String]): DoWith[W,Expr] = {
     def ren(env: Map[String,String], e: Expr): DoWith[W,Expr] = e match {
-      case N(_) | B(_) | Undefined | S(_) => doreturn(e)
+      case N(_) | B(_) | Undefined | S(_) | Null | A(_) => doreturn(e)
       case Print(e1) => ren(env,e1) map { e1p => Print(e1p) }
 
       case Unary(uop, e1) => ren(env,e1) map { e1p => Unary(uop, e1p) }
@@ -82,14 +82,13 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
           }
         }
       }
-
-      case Call(e1, args) => ???
+      //Call(ren(env, e1), args.map(arg => ren(env, arg))) Lab4 implementation
+        //uses mapWith because args are list
+      case Call(e1, args) => ren(env,e1) flatMap { e1p => mapWith(args)(argp => ren(env,argp)) map { argsp => Call(e1p,argsp)}}
 
       case Obj(fields) => ???
-      case GetField(e1, f) => ???
-
-      case Null | A(_) => ???
-      case Assign(e1, e2) => ???
+      case GetField(e1, f) => ren(env,e1) map { e1p => GetField(e1p,f) }
+      case Assign(e1, e2) => ren(env,e1) flatMap { e1p => ren(env,e2) map { e2p => Assign(e1p,e2p) } }
 
       /* Should not match: should have been removed */
       case InterfaceDecl(_, _, _) => throw new IllegalArgumentException("Gremlins: Encountered unexpected expression %s.".format(e))
@@ -455,11 +454,11 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
         /***** More cases here */
         /***** Cases needing adapting from Lab 4. */
-      case Obj(fields) if (fields forall { case (_, vi) => isValue(vi)}) =>
-        ???
+        //DoObject
+      case Obj(fields) if (fields forall { case (_, vi) => isValue(vi)}) => memalloc(Obj(fields))
       case GetField(a @ A(_), f) =>
         ???
-
+        //DoDecl
       case Decl(MConst, x, v1, e2) if isValue(v1) =>
         ???
       case Decl(MVar, x, v1, e2) if isValue(v1) =>
@@ -516,15 +515,15 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case Obj(fields) =>
         ???
         //SearchDecl
-      case Decl(mode, x, e1, e2) => step(e1) map { e1p => Decl(mode,x,e1p,e2) }
-      case Call(e1, args) =>
-        ???
+      case Decl(mode, x, e1, e2) if !isRedex(mode,e1) => step(e1) map { e1p => Decl(mode,x,e1p,e2) }
+        //SearchCall1
+      case Call(e1, args) => step(e1) map { e1p => Call(e1p, args) }
 
         /***** New cases for Lab 5.  */
-      case Assign(e1, e2) if ??? =>
-        ???
-      case Assign(e1, e2) =>
-        ???
+        //SearchAssign1
+      case Assign(e1, e2) if !isLValue(e1) => step(e1) map { e1p => Assign(e1p,e2) }
+        //SearchAssign2
+      case Assign(e1, e2) => step(e2) map { e2p => Assign(e1,e2p) }
 
       /* Everything else is a stuck error. */
       case _ => throw StuckError(e)
