@@ -268,7 +268,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         if(isBindex(m,e1)){ // if e1 is bindable to to a variable
           typeof(env + (x -> MTyp(m, typeof(env, e1))), e2)
         }
-        else err(typeof(env, e1)), e1)
+        else err(typeof(env, e1), e1)
 
 
 
@@ -443,6 +443,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         bop match {
           case Eq => doreturn(B(v1 == v2))
           case Ne => doreturn(B(v1 != v2))
+          case _ => throw StuckError(e)
         }
         //DoAndTrue & DoAndFalse
       case Binary(And, v1, e2) if isValue(v1) =>
@@ -464,6 +465,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
               case Minus => doreturn(N(n1 - n2))
               case Times => doreturn(N(n1 * n2))
               case Div => doreturn(N(n1 / n2))
+              case _ => throw StuckError(e)
             }
           case _ => throw StuckError(e)
         }
@@ -476,6 +478,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
               case Le => doreturn(B(inequalityVal(Le,v1,v2)))
               case Gt => doreturn(B(inequalityVal(Gt,v1,v2)))
               case Ge => doreturn(B(inequalityVal(Ge,v1,v2)))
+              case _ => throw StuckError(e)
             }
           case _ => throw StuckError(e)
         }
