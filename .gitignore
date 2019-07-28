@@ -4,3 +4,4 @@ project/target/
 project/project/
 .ivy2
 .sbt
+.DS_Store

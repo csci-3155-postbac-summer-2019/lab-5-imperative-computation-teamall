@@ -63,25 +63,24 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
       case Function(p, params, tann, e1) => {
         val w: DoWith[W,(Option[String], Map[String,String])] = p match {
+          // anonymous function, nothing to recurse on
           case None => doreturn((None, env))
-          case Some(x) => fresh(x) map { xp => (Some(xp), extend(env, x, xp))}
-          //case Some(x) => doreturn((Some(fresh(x)), extend(env, x, fresh(x))))
-          /*case Some(x) => fresh(x) flatMap { xp =>
-            extend(env, x, fresh(x) map { envp =>
-              (Some(xp), envp)
-            }
-          }*/
+            // function has a name, get the fresh name pprime and map return to variable w
+            // a function (dowith) with a pair (Some(pprime) and the extended environment) in the result slot
+          case Some(x) => fresh(x) map { pprime => (Some(pprime), extend(env, x, pprime))}
         }
+        // after we have the pair in the result slot, flatmap the parameters into w
         w flatMap { case (pp, envp) =>
+          // foldRight existing params (pprime)
+          // takes in a dowith with a pair of (list of params and map of environments) in the result slot
+          // returns a doreturn
           params.foldRight[DoWith[W,(List[(String,MTyp)],Map[String,String])]]( doreturn((Nil, envp)) ) {
             case ((x,mty), acc) => acc flatMap {
-              ??? // Need to extend the environment with fresh parameter names. In Lab 4, we used this line:
-              // {(List{(fresh(param._1), param._2)}, extend(env, param._1, fresh(param._1)))}
-              // Need to do something similar here.
+              case (paramsdoubleprime, envdoubleprime) => fresh(x) map {xp => ((xp,mty)::paramsdoubleprime, extend(envdoubleprime, x, xp)) }
             }
           } flatMap {
-            ??? // Use flatMap to build the return Function from the previous sections. In Lab4:
-            // Function(pp, paramsp, tann, ren(envpp, e1))
+            // call ren on the triple prime environment and map the new e1 to the function with renamed params and env
+            case (paramstripleprime, envtripleprime) => ren(envtripleprime, e1) map {e1p => Function(pp, paramstripleprime, tann, e1p)}
           }
         }
       }
@@ -134,11 +133,15 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
   def mapFirstWith[W,A](l: List[A])(f: A => Option[DoWith[W,A]]): DoWith[W,List[A]] = l match {
     //doreturn[W, R](r : R) creates a computation that leaves the state untouched,
     //but whose result is r
+      //leave the w (state) unchanged and put the Nil list in the result box
     case Nil => doreturn(l) //doget map { _ => l}
     case h :: t => f(h) match {
         //map method transforms a DoWith holding a computation with a W for a R to one for B using the callback f
-      case None => mapFirstWith(t)(f) map  {(ft) => h :: ft}
-      case Some(d) => d map {d => d :: t}
+        // if we get a none, recurse on the tail
+        // prepend the head back onto the front of the list
+      case None => mapFirstWith(t)(f) map {(ft) => h :: ft}
+
+      case Some(dowith) => dowith map {(dowith) => dowith :: t}
     }
   }
 
@@ -261,7 +264,13 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       }
 
         /***** Cases from Lab 4 that need a small amount of adapting. */
-      case Decl(m, x, e1, e2) => ??? //if isBindex(m, e1)  // typeof(env + (x -> typeof(env, e1)), e2)
+      case Decl(m, x, e1, e2) =>
+        if(isBindex(m,e1)){ // if e1 is bindable to to a variable
+          typeof(env + (x -> MTyp(m, typeof(env, e1))), e2)
+        }
+        else err(typeof(env, e1)), e1)
+
+
 
       case Function(p, params, tann, e1) => {
         // Bind to env1 an environment that extends env with an appropriate binding if
