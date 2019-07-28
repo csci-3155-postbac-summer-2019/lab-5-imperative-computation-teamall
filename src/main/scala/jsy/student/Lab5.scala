@@ -75,10 +75,13 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         w flatMap { case (pp, envp) =>
           params.foldRight[DoWith[W,(List[(String,MTyp)],Map[String,String])]]( doreturn((Nil, envp)) ) {
             case ((x,mty), acc) => acc flatMap {
-              ???
+              ??? // Need to extend the environment with fresh parameter names. In Lab 4, we used this line:
+              // {(List{(fresh(param._1), param._2)}, extend(env, param._1, fresh(param._1)))}
+              // Need to do something similar here.
             }
           } flatMap {
-            ???
+            ??? // Use flatMap to build the return Function from the previous sections. In Lab4:
+            // Function(pp, paramsp, tann, ren(envpp, e1))
           }
         }
       }
@@ -86,7 +89,9 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         //uses mapWith because args are list
       case Call(e1, args) => ren(env,e1) flatMap { e1p => mapWith(args)(argp => ren(env,argp)) map { argsp => Call(e1p,argsp)}}
 
-      case Obj(fields) => ???
+      case Obj(fields) => ???  // mapWith(fields)(field =>  )   <-Not sure about the next step here. Need to rename the
+        // values in the fields. mapWith seems to be the best option.
+
       case GetField(e1, f) => ren(env,e1) map { e1p => GetField(e1p,f) }
       case Assign(e1, e2) => ren(env,e1) flatMap { e1p => ren(env,e2) map { e2p => Assign(e1p,e2p) } }
 
@@ -194,37 +199,59 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case Binary(Plus, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
         case (TNumber, TNumber) => TNumber
         case (TString, TString) => TString
-        case (tgot1, tgot2) => err(tgot1, e1)
+        case (TNumber, tgot) => err(tgot, e2)
+        case (TString, tgot) => err(tgot, e2)
+        case (tgot1, _) => err(tgot1, e1)
       }
 
       case Binary(Minus|Times|Div, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
         case (TNumber, TNumber) => TNumber
-        case (tgot1, tgot2) => err(tgot1, e1)
+        case (TNumber, tgot) => err(tgot, e2)
+        case (tgot1, _) => err(tgot1, e1)
       }
 
       case Binary(Eq|Ne, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
-        case (typeE1, typeE2) if (!hasFunctionTyp(typeE1)) && (!hasFunctionTyp(typeE2)) => typeE1
-        case (tgot1, tgot2) => err(tgot1, e1)
+        case (TNumber, TNumber) => TBool
+        case (TString, TString) => TBool
+        case (TBool, TBool) => TBool
+        case (TObj(_), TObj(_)) => TBool
+        case (TUndefined, TUndefined) => TBool
+        case (TBool, tgot) => err(tgot, e2)
+        case (TObj(_), tgot) => err(tgot, e2)
+        case (TUndefined, tgot) => err(tgot, e2)
+        case (TNumber, tgot) => err(tgot, e2)
+        case (TString, tgot) => err(tgot, e2)
+        case (tgot, _) => err(tgot, e1)
       }
 
       case Binary(Lt|Le|Gt|Ge, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
         case (TString, TString) => TString
         case (TNumber, TNumber) => TNumber
-        case (tgot1, tgot2) => err(tgot1, e1)
+        case (TNumber, tgot) => err(tgot, e2)
+        case (TString, tgot) => err(tgot, e2)
+        case (tgot1, _) => err(tgot1, e1)
       }
 
       case Binary(And|Or, e1, e2) => (typeof(env, e1), typeof(env, e2)) match {
         case (TBool, TBool) => TBool
-        case (tgot1, tgot2) => err(tgot1, e1)
+        case (TBool, tgot) => err(tgot, e2)
+        case (tgot1, _) => err(tgot1, e1)
       }
 
       case Binary(Seq, e1, e2) => e2 match {
-        case _ => typeof(env, e2)
+        case _ => typeof(env, e2) ; typeof(env, e2)
       }
 
-      case If(e1, e2, e3) => (typeof(env, e1), typeof(env, e2), typeof(env, e3)) match {
-        case (TBool, typeE2, typeE3) => typeE2
-        case (_, tgot2, tgot3) if tgot2 != tgot3 => err(tgot2, e2)
+      case If(e1, e2, e3) => typeof(env, e1) match {
+        case TBool => (typeof(env, e2), typeof(env, e3)) match {
+          case (TNumber, TNumber) => TNumber
+          case (TString, TString) => TString
+          case (TBool, TBool) => TBool
+          case (TNumber, tgot) => err(tgot, e2)
+          case (TString, tgot) => err(tgot, e2)
+          case (TBool, tgot) => err(tgot, e2)
+          case (tgot, _) => err(tgot, e1)
+        }
       }
 
       case Obj(fields) => TObj(fields mapValues( exp => typeof(env,exp)))
@@ -234,7 +261,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       }
 
         /***** Cases from Lab 4 that need a small amount of adapting. */
-      case Decl(m, x, e1, e2) => ???
+      case Decl(m, x, e1, e2) => ??? //if isBindex(m, e1)  // typeof(env + (x -> typeof(env, e1)), e2)
 
       case Function(p, params, tann, e1) => {
         // Bind to env1 an environment that extends env with an appropriate binding if
@@ -266,8 +293,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         ???
       case Assign(_, _) => err(TUndefined, e)
 
-      case Null =>
-        ???
+      case Null => TNull
 
       case Unary(Cast(t), e1) => typeof(env, e1) match {
         case tgot if ??? => ???
