@@ -313,8 +313,11 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       }
 
       /***** New cases for Lab 5. ***/
-      case Assign(Var(x), e1) =>
-        ???
+      case Assign(Var(x), e1) => env(x) match {  //Get type of x from TEnv
+        case MTyp(x_mode, x_type) if (x_mode == MVar || x_mode == MRef) && (x_type == typeof(env, e1)) => x_type  //As per inference rule
+        case tgot => err(tgot.t, e1) //Error if inference rule conditions are not held
+      }
+
       case Assign(GetField(e1, f), e2) =>
         ???
       case Assign(_, _) => err(TUndefined, e)
