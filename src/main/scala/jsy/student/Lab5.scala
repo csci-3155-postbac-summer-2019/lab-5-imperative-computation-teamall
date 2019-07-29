@@ -273,26 +273,30 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         else err(typeof(env, e1), e1)
 
 
-
+      //Mostly copied from Lab4
       case Function(p, params, tann, e1) => {
         // Bind to env1 an environment that extends env with an appropriate binding if
         // the function is potentially recursive.
         val env1 = (p, tann) match {
           /***** Add cases here *****/
-          case (None, _) => env // Function is anonymous if no p; return env
-          case (Some(pname), Some(t)) => extend(env, pname, TFunction(params, t))
+          case (Some(function_name), Some(return_type)) => {
+            env + (function_name -> MTyp(MConst, TFunction(params, return_type)))  //Updated to be MTyp, instead of just Typ
+          }
+          case (None, _ ) => env
           case _ => err(TUndefined, e1)
         }
         // Bind to env2 an environment that extends env1 with bindings for params.
-        val env2 = params.foldLeft(env1){(env1, param) => {param match {
-          case (str, MTyp(m, ttyp)) => ??? // extend(env1, str, ttyp)
-            }
-          }
-        }
+        val env2 = params.foldLeft(env1)({
+          case (acc, (xi, mi)) => acc + (xi -> mi)  //Update to be MTyp added to environment instead of just Typ
+        })
         // Infer the type of the function body
-        val t1 = ??? //typeof(env2, e1)
+        val t1 = typeof(env2, e1)
         // Check with the possibly annotated return type
-        ???
+        tann match {
+          case Some(specified_ret_type) if(specified_ret_type == t1) => TFunction(params, specified_ret_type)
+          case None => TFunction(params, t1)
+          case _ => err(t1, e1)
+        }
       }
       case Call(e1, args) => typeof(env, e1) match {
         case TFunction(params, tret) if (params.length == args.length) =>
@@ -514,8 +518,9 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         ???
 
       /***** New cases for Lab 5. */
-      case Unary(Deref, a @ A(_)) =>
-        ???
+        //DoDeref
+        //Coded in lecture video "Implementing Imperative Computation: State" at minute 31
+      case Unary(Deref, a @ A(_)) => doget[Mem] map { m => m(a) }
 
       case Assign(Unary(Deref, a @ A(_)), v) if isValue(v) =>
         domodify[Mem] { m => ??? } map { _ => ??? }
