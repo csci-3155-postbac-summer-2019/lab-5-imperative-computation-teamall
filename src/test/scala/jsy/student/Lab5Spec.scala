@@ -81,6 +81,7 @@ class Lab5Spec(lab5: Lab5Like) extends FlatSpec {
     assertResult(ep) { myuniquify(e) }
   }
 
+
   "isRedex" should "capture when expression e is reducible under a mode m" in {
     val t = true
     val f = false

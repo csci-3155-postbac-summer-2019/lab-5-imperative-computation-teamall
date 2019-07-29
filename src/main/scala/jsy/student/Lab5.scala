@@ -88,8 +88,10 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       //uses mapWith because args are list
       case Call(e1, args) => ren(env,e1) flatMap { e1p => mapWith(args)(argp => ren(env,argp)) map { argsp => Call(e1p,argsp)}}
 
-      case Obj(fields) => ???  // mapWith(fields)(field =>  )   <-Not sure about the next step here. Need to rename the
-      // values in the fields. mapWith seems to be the best option.
+      //case Obj(fields) => ???  // mapWith(fields)(field =>  )   <-Not sure about the next step here. Need to rename the
+      //Similar to call case above, need mapwith for list of fields, then rename each expression within field tuple.  Return remapped fields as Obj type through mapping.
+      case Obj(fields) => mapWith(fields){ field => ren(env, field._2) map { fieldExprp => (field._1, fieldExprp) } } map { fieldsp => Obj(fieldsp) }
+      // values in the fields. mapWith seems to be the best option. <- Agree JB
 
       case GetField(e1, f) => ren(env,e1) map { e1p => GetField(e1p,f) }
       case Assign(e1, e2) => ren(env,e1) flatMap { e1p => ren(env,e2) map { e2p => Assign(e1p,e2p) } }
