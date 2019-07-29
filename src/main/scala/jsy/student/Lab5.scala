@@ -322,8 +322,8 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case Null => TNull
 
       case Unary(Cast(t), e1) => typeof(env, e1) match {
-        case tgot if ??? => ???
-        case tgot => err(tgot, e1)
+        case tgot if castOk(t, tgot) => tgot //if t can be cast as t2 (i.e., the type of e1), return tgot
+        case tgot => err(tgot, e1) //else return type error
       }
 
       /* Should not match: non-source expressions or should have been removed */
