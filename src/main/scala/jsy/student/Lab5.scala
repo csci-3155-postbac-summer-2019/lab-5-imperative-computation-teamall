@@ -154,8 +154,16 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
   def castOk(t1: Typ, t2: Typ): Boolean = (t1, t2) match {
     /***** Make sure to replace the case _ => ???. */
-    case (TNull, TObj(x)) => true  //Revise (Added for testcase passing, did not improve score)
-    //Add more cases here
+    //CastOkEq
+    case (type1, type2) if type1 == type2 => true
+    //CastOKNull
+    case (TNull, _) => true  // Revise (Added for testcase passing, did not improve score)
+                             // Changed TObj(x) to wildcard. I interpret the inference rule as
+                             // Null can cast to any other type
+    //CastOkObject^
+
+    //CastOkObject down arrow
+      
     //case_ ???
     /***** Cases for the extra credit. Do not attempt until the rest of the assignment is complete. */
     case (TInterface(tvar, t1p), _) => ???
