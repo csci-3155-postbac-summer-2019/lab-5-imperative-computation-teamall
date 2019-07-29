@@ -301,7 +301,12 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case Call(e1, args) => typeof(env, e1) match {
         case TFunction(params, tret) if (params.length == args.length) =>
           (params zip args).foreach {
-            ???
+            //Copied from Lab 4 (Update to check for bindex as per updated inference rule in Lab5 Handout)
+            p : ((String, MTyp), Expr) => {
+              if (p._1._2.t != typeof(env, p._2) || !isBindex(p._1._2.m, p._2)) {  //Error if types mismatch or is not bindex
+                err(p._1._2.t, p._2)
+              }
+            }
           }
           tret
         case tgot => err(tgot, e1)
