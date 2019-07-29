@@ -279,12 +279,18 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         // the function is potentially recursive.
         val env1 = (p, tann) match {
           /***** Add cases here *****/
+          case (None, _) => env // Function is anonymous if no p; return env
+          case (Some(pname), Some(t)) => extend(env, pname, TFunction(params, t))
           case _ => err(TUndefined, e1)
         }
         // Bind to env2 an environment that extends env1 with bindings for params.
-        val env2 = ???
+        val env2 = params.foldLeft(env1){(env1, param) => {param match {
+          case (str, MTyp(m, ttyp)) => ??? // extend(env1, str, ttyp)
+            }
+          }
+        }
         // Infer the type of the function body
-        val t1 = ???
+        val t1 = ??? //typeof(env2, e1)
         // Check with the possibly annotated return type
         ???
       }
