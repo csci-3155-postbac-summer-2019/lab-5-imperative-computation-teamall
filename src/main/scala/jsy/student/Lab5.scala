@@ -318,8 +318,11 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         case tgot => err(tgot.t, e1) //Error if inference rule conditions are not held
       }
 
-      case Assign(GetField(e1, f), e2) =>
-        ???
+      case Assign(GetField(e1, f), e2) => typeof(env, e1) match {  //Get type of e1
+        case TObj(fieldOfTypes) if fieldOfTypes(f) == typeof(env, e2) => fieldOfTypes(f)  //As per inference rule
+        case tgot => err(tgot, e2)
+      }
+
       case Assign(_, _) => err(TUndefined, e)
 
       case Null => TNull
