@@ -320,6 +320,12 @@ class Lab5Spec(lab5: Lab5Like) extends FlatSpec {
     val e1 = parse("var a = 1; a")
     val e1p = step(parse("var a = 0+1; a"))(memempty)._2
     assertResult(e1) {e1p}
+    }
+
+  it should "step on e1" in {
+    val e1 = Decl(MConst, "x", Binary(Minus, N(100), N(75)), Undefined )
+    val (wp, e1p) = step(e1)(memempty)
+    assertResult(Decl(MConst,"x",N(25), Undefined)) {e1p}
   }
 
 
