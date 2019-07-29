@@ -518,8 +518,9 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         ???
 
       /***** New cases for Lab 5. */
-      case Unary(Deref, a @ A(_)) =>
-        ???
+        //DoDeref
+        //Coded in lecture video "Implementing Imperative Computation: State" at minute 31
+      case Unary(Deref, a @ A(_)) => doget[Mem] map { m => m(a) }
 
       case Assign(Unary(Deref, a @ A(_)), v) if isValue(v) =>
         domodify[Mem] { m => ??? } map { _ => ??? }
