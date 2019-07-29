@@ -520,13 +520,15 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case GetField(a @ A(_), f) =>
         ???
       //DoDecl
-      case Decl(MConst, x, v1, e2) if isValue(v1) => doreturn(e) //if v1 is a value, do we still need to step on it?
-      case Decl(MConst, x, v1, e2) => step(v1) map { e1p => Decl(MConst,x,e1p,e2) } //this will evaluate e1 and pass our unit test
+      case Decl(MConst, x, v1, e2) if isValue(v1) => doreturn(substitute(e2,v1,x))  //if v1 is a value, do we still need to step on it?
+      //case Decl(MConst, x, v1, e2) => step(v1) map { e1p => Decl(MConst,x,e1p,e2) } //this will evaluate e1 and pass our unit test
 
+      //for mode MVar, we need to allocate new memory for v1
+      //then add the mapping from the dereferenced address a (to v1)
+      //and substitute the derefenced value v1 for x in e2
+      case Decl(MVar, x, v1, e2) if isValue(v1) => memalloc(v1) map { a => substitute(e2,Unary(Deref,a),x) }
+      //case Decl(mode, x, e1,e2) if !isRedex(mode, e1) => getBinding(mode, e1) map { e1p =>  substitute(e2, e1p, x) }
 
-
-      case Decl(MVar, x, v1, e2) if isValue(v1) =>
-        ???
 
       /***** New cases for Lab 5. */
         //DoDeref
@@ -583,7 +585,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case Obj(fields) =>
         ???
       //SearchDecl
-      case Decl(mode, x, e1, e2) if !isRedex(mode,e1) => step(e1) map { e1p => Decl(mode,x,e1p,e2) }
+      case Decl(mode, x, e1, e2) if isRedex(mode,e1) => step(e1) map { e1p => Decl(mode,x,e1p,e2) }
       //SearchCall1
       case Call(e1, args) => step(e1) map { e1p => Call(e1p, args) }
 
