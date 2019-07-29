@@ -527,8 +527,11 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         //Coded in lecture video "Implementing Imperative Computation: State" at minute 31
       case Unary(Deref, a @ A(_)) => doget[Mem] map { m => m(a) }
 
+      //DoAssignVar
+          //def +(kv: (A, Expr)): Mem = new Mem(map + kv, nextAddr) from pdf
+          //deref a and add it to mapping (A: a, Expr: v)
       case Assign(Unary(Deref, a @ A(_)), v) if isValue(v) =>
-        domodify[Mem] { m => ??? } map { _ => ??? }
+        domodify[Mem] { m => m+(a,v) } map { _ => v }
 
       case Assign(GetField(a @ A(_), f), v) if isValue(v) =>
         ???
