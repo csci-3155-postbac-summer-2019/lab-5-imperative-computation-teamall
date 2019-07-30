@@ -571,9 +571,23 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
         }
       }
 
+        //case class Cast(t: Typ) extends Uop
+        //DoCast & DoCastNull
+      case Unary(Cast(t),e1) if isValue(e1) => t match {
+        case TNull => doreturn(null)
+        case _ => doreturn(e1)
+      }
+
+
+
       /* Base Cases: Error Rules */
       /***** Replace the following case with a case to throw NullDeferenceError.  */
       //case _ => throw NullDeferenceError(e)
+
+        //NullErrorGetField
+      case GetField(Null, _) => throw NullDereferenceError(e)
+        //NullErrorAssignField
+      case Assign(GetField(Null, _), _) => throw NullDereferenceError(e)
 
       /* Inductive Cases: Search Rules */
       //SearchPrint
