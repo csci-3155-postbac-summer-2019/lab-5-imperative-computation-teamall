@@ -617,8 +617,8 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       //SearchIf
       case If(e1,e2,e3) => step(e1) map { e1p => If(e1p,e2,e3) }
       /***** Cases needing adapting from Lab 4 */
-      case GetField(e1, f) =>
-        ???
+        //SearchGetField
+      case GetField(e1, f) => step(e1) map { e1p => GetField(e1p, f) }
       case Obj(fields) =>
         ???
       //SearchDecl
