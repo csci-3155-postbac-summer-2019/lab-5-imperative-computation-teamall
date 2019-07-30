@@ -154,16 +154,26 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
   def castOk(t1: Typ, t2: Typ): Boolean = (t1, t2) match {
     /***** Make sure to replace the case _ => ???. */
+    /* castOK specifies when t1 can be cast as type t2*/
+
     //CastOkEq
     case (type1, type2) if type1 == type2 => true
     //CastOKNull
     case (TNull, _) => true  // Revise (Added for testcase passing, did not improve score)
                              // Changed TObj(x) to wildcard. I interpret the inference rule as
                              // Null can cast to any other type
-    //CastOkObject^
+    // CastOkObject^
+    // Both CastOk cases include 'm'. Need to determine what exactly this means.
+
+    // CastOK^: For all fields in object, initial types in the object are the NOT same. fm:tm
+      // for all of the fields, ti steps to tip (ti prime)
 
     //CastOkObject down arrow
-      
+      // In this case, the initial types in the obejct are all the same.
+      // From there, need to cast all of the individual types to ti prime.
+
+    // Remember: castOk returns a boolean
+
     //case_ ???
     /***** Cases for the extra credit. Do not attempt until the rest of the assignment is complete. */
     case (TInterface(tvar, t1p), _) => ???
@@ -525,8 +535,12 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       /***** Cases needing adapting from Lab 4. */
       //DoObject
       case Obj(fields) if (fields forall { case (_, vi) => isValue(vi)}) => memalloc(Obj(fields))
+
+      //DoGetField
       case GetField(a @ A(_), f) =>
-        ???
+      doreturn(Var(f)) // Uncertain about making f a Var. According to judgement rule, we just
+        //return the value from the field
+
       //DoDecl
       case Decl(MConst, x, v1, e2) if isValue(v1) => doreturn(substitute(e2,v1,x))  //if v1 is a value, do we still need to step on it?
       //case Decl(MConst, x, v1, e2) => step(v1) map { e1p => Decl(MConst,x,e1p,e2) } //this will evaluate e1 and pass our unit test
@@ -549,6 +563,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case Assign(Unary(Deref, a @ A(_)), v) if isValue(v) =>
         domodify[Mem] { m => m+(a,v) } map { _ => v }
 
+      // DoAssignField
       case Assign(GetField(a @ A(_), f), v) if isValue(v) =>
         ???
 
