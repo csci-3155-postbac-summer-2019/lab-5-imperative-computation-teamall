@@ -617,10 +617,17 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       //SearchIf
       case If(e1,e2,e3) => step(e1) map { e1p => If(e1p,e2,e3) }
       /***** Cases needing adapting from Lab 4 */
-        //SearchGetField
+      //SearchGetField
       case GetField(e1, f) => step(e1) map { e1p => GetField(e1p, f) }
-      case Obj(fields) =>
-        ???
+      //SearchObject
+      //https://twitter.github.io/scala_school/collections.html#find
+      case Obj(fields) => fields find { case (_, field_expr) => !isValue(field_expr)} match { //Get first field where an expression is not a value yet
+        case Some(field) => field match {  //If a field is found
+          case (f_name, f_expr) => step(f_expr) map { f_expr_p => Obj(fields + (f_name -> f_expr_p)) }  //Step expression of field and update mapping
+          case _ => throw StuckError(e)  //Should not get here
+        }
+        case None => doreturn(Obj(fields))  //Return object, no more reduction possible (All field expressions are values)
+      }
       //SearchDecl
       case Decl(mode, x, e1, e2) if isRedex(mode,e1) => step(e1) map { e1p => Decl(mode,x,e1p,e2) }
       //SearchCall1
