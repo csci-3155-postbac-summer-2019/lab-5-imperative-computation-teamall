@@ -159,6 +159,7 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
     //CastOkEq
     case (type1, type2) if type1 == type2 => true
     //CastOKNull
+    case (_, TNull) => true
     case (TNull, _) => true  // Revise (Added for testcase passing, did not improve score)
                              // Changed TObj(x) to wildcard. I interpret the inference rule as
                              // Null can cast to any other type
@@ -537,9 +538,17 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
       case Obj(fields) if (fields forall { case (_, vi) => isValue(vi)}) => memalloc(Obj(fields))
 
       //DoGetField
-      case GetField(a @ A(_), f) =>
-      doreturn(Var(f)) // Uncertain about making f a Var. According to judgement rule, we just
-        //return the value from the field
+      //case GetField(a @ A(_), f) =>
+      //doreturn(Var(f)) // Uncertain about making f a Var. According to judgement rule, we just
+      //return the value from the field
+
+      //DoGetField
+      case GetField(a @ A(_), f) => doget map {  //Get memory
+        m: Mem => m(a) match {  //look up memory location
+          case Obj(fields) => fields(f)  //Get field mapping of f
+          case _ => throw StuckError(e)  //Should not get here
+        }
+      }
 
       //DoDecl
       case Decl(MConst, x, v1, e2) if isValue(v1) => doreturn(substitute(e2,v1,x))  //if v1 is a value, do we still need to step on it?
@@ -565,7 +574,11 @@ object Lab5 extends jsy.util.JsyApplication with Lab5Like {
 
       // DoAssignField
       case Assign(GetField(a @ A(_), f), v) if isValue(v) =>
-        ???
+        domodify[Mem] { m => m(a) match {  //get memory location
+          //Add new/updated object to memory mapping
+          case Obj(fields) if fields.contains(f) => m + (a, Obj(fields + (f -> v)))
+          case _  => throw StuckError(e)  //Should not get here
+        } } map { _ => v } //As in DoAssignVar
 
       case Call(v @ Function(p, params, _, e), args) => {
         val pazip = params zip args
